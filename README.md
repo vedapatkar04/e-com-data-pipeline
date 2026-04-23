@@ -11,7 +11,7 @@ An end to end E commerce data platform project simulating a pipeline from raw tr
 -------------------------------------------------------------------------------------------------------------------------------
 
 ## Architecture
-
+```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Data Sources                             │
 │   OLTP PostgreSQL (orders, users, products, clickstream)        │
@@ -38,21 +38,23 @@ An end to end E commerce data platform project simulating a pipeline from raw tr
 │                   Data Quality & Monitoring                     │
 │   Great Expectations checks + Pipeline health monitoring        │
 └─────────────────────────────────────────────────────────────────┘
-
+```
 
 -------------------------------------------------------------------------------------------------------------------------------
 
 ## Tech Stack
 
- Layer	                      Tool	                                  Version
----------------          ----------------------                     -------------
-Source DB	                PostgreSQL	                                15
-Orchestration	            Apache Airflow	                            2.8.1
-Streaming	                Apache Kafka	                            7.5.0
-Transformation	            dbt Core	                                1.7.0
-Data Quality	            Great Expectations	                        latest
-Language	                Python	                                    3.14
-Containers	                Docker Compose	
+ ## Tech Stack
+
+| Layer | Tool | Version |
+|---|---|---|
+| Source DB | PostgreSQL | 15 |
+| Orchestration | Apache Airflow | 2.8.1 |
+| Streaming | Apache Kafka | 7.5.0 |
+| Transformation | dbt Core | 1.7.0 |
+| Data Quality | Great Expectations | latest |
+| Language | Python | 3.11+ |
+| Containers | Docker Compose | - |
 
 
 -------------------------------------------------------------------------------------------------------------------------------

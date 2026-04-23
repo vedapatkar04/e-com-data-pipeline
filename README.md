@@ -44,8 +44,6 @@ An end to end E commerce data platform project simulating a pipeline from raw tr
 
 ## Tech Stack
 
- ## Tech Stack
-
 | Layer | Tool | Version |
 |---|---|---|
 | Source DB | PostgreSQL | 15 |

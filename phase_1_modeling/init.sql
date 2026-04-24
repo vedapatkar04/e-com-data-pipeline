@@ -1,4 +1,6 @@
 -- Schema Initialization
+
+
 -- SCHEMA 1: OLTP (Transactional / Source)
 -- Normalized, write-optimized
 
@@ -83,3 +85,92 @@ CREATE INDEX IF NOT EXISTS idx_order_created_at ON oltp.order(created_at);
 CREATE INDEX IF NOT EXISTS idx_order_items_order ON oltp.order_items(order_id); 
 CREATE INDEX IF NOT EXISTS idx_clickstream_user ON oltp.clickstream_events(user_id); 
 CREATE INDEX IF NOT EXISTS idx_clickstream_event ON oltp.clickstream_events(event_at); 
+
+
+
+-- SCHEMA 2: OLAP (Analytical / Data Warehouse)
+-- Star schema — denormalized, read-optimized
+
+-- Create a schema named  warehouse
+CREATE SCHEMA IF NOT EXISTS warehouse;
+
+-- Dimension
+
+-- dim_date
+CREATE TABLE IF NOT EXISTS warehouse.dim_date (
+    date_key INT PRIMARY KEY,
+    full_date DATE NOT NULL,
+    day_of_week VARCHAR(10),
+    day_num INT,
+    month_num INT,
+    month_name VARCHAR(10),
+    quarter INT,
+    year INT,
+    is_weekend BOOLEAN
+);
+
+-- Pre populate date for 2022 2026
+INSERT INTO warehouse.dim_date 
+SELECT
+    TO_CHAR(d, 'YYYYMMDD')::INT AS date_key,
+    d::DATE AS full_date,
+    TO_CHAR(d, 'Day') AS day_of_week,
+    EXTRACT(DAY FROM d)::INT AS day_num,
+    EXTRACT(MONTH FROM d)::INT AS month_num,
+    TO_CHAR(d, 'Month') AS month_name,
+    EXTRACT(QUARTER FROM d)::INT AS quarter,
+    EXTRACT(YEAR FROM d)::INT AS year,
+    EXTRACT(DOW FROM d) IN (0, 6) AS is_weekend
+FROM generate_series('2022-01-01'::DATE, '2026-12-31'::DATE, '1 day'::INTERVAL) AS d;
+
+
+-- dim_users
+CREATE TABLE IF NOT EXISTS warehouse.dim_users (
+    user_key SERIAL PRIMARY KEY,
+    user_id UUID NOT NULL,
+    full_name VARCHAR(10),
+    country VARCHAR(100),
+    segment VARCHAR(50),
+    registered_at DATE
+);
+
+-- dim_products
+CREATE TABLE IF NOT EXISTS warehouse.dim_products (
+    product_key SERIAL PRIMARY KEY,
+    product_id UUID NOT NULL,
+    name VARCHAR(255),
+    category VARCHAR(100),
+    price_band VARCHAR(20)
+);
+
+-- dim_loc
+CREATE TABLE IF NOT EXISTS warehouse.dim_location (
+    location_key SERIAL PRIMARY KEY,
+    country VARCHAR(100),
+    region VARCHAR(100)
+);
+
+
+
+-- Fact
+
+
+-- fact_orders
+CREATE TABLE IF NOT EXISTS warehouse.fact_orders (
+    order_item_key  SERIAL PRIMARY KEY,
+    user_key INT REFERENCES warehouse.dim_users(user_key),
+    product_key INT REFERENCES warehouse.dim_products(product_key),
+    date_key INT REFERENCES warehouse.dim_date(date_key),
+    location_key INT REFERENCES warehouse.dim_location(location_key),
+    -- Source
+    order_id        UUID,
+    -- Measures
+    quantity INT,
+    unit_price NUMERIC(10, 2),
+    discount_amt NUMERIC(10, 2),
+    total_revenue NUMERIC(10, 2),
+    order_status VARCHAR(20)
+);
+
+
+
